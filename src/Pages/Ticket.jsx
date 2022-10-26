@@ -28,8 +28,17 @@ function Ticket() {
   useEffect(() => {
     fetchData();
   }, []);
-  let emailNow = () => {
+  let emailNow = async () => {
     let mailid = prompt("Emter Your Email");
+    try {
+      let res = await axios.post(`${config.api}/api/mail/message`, {
+        mailid,
+        ...ticket,
+      });
+      alert(res.data.message);
+    } catch (error) {
+      console.log(error)
+    }
     console.log(mailid);
   };
   return (
