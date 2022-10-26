@@ -3,21 +3,28 @@ import { useFormik } from "formik";
 import React, { useState } from "react";
 import { RiArrowUpDownLine } from "react-icons/ri";
 import { airports, airlines } from "../airports";
+import Card from "../Components/Card";
 import Navbar from "../Components/Navbar";
 import { config } from "../config";
 
 function Dashboard() {
   let [display, setDisplay] = useState("d-none");
   var airline = [];
+  let [price, setPrice] = useState(200);
+  let [offer, setOffer] = useState(0);
   for (let i = 0; i < 3; i++) {
     airline[i] = airlines[Math.floor(Math.random() * airlines.length)];
   }
   let showFlight = () => {
     setDisplay("d-block");
-    document.querySelector('#date').setAttribute('disabled' ,true)
+    document.querySelector("#date").setAttribute("disabled", true);
   };
   // console.log(today >= '10/26/2022' );
-
+  let showDate = () => {
+    setPrice(200);
+    setDisplay("d-none");
+    document.querySelector("#date").removeAttribute("disabled");
+  };
   let changeTab = () => {
     let temp = "",
       temp2;
@@ -30,6 +37,10 @@ function Dashboard() {
     formik.values.from = formik.values.to;
     formik.values.to = temp2;
   };
+  let calculateOffer = (offer) => {
+    if (!(offer == 0)) setPrice(price - (price * offer) / 100);
+  };
+
   const formik = useFormik({
     initialValues: {
       from: "",
@@ -59,10 +70,17 @@ function Dashboard() {
     onSubmit: async (values) => {
       console.log(values);
       try {
-        let res = await axios.post(`${config.api}/api/date/dashboard`, values);
-        console.log(res.data)
+        let res = await axios.post(`${config.api}/api/date/dashboard`, values, {
+          headers: {
+            Authorization: `${localStorage.getItem("react_app_token")}`,
+          },
+        });
+        console.log(res.data);
         alert(res.data.message);
         showFlight();
+        setPrice(200);
+        setOffer(res.data.offer);
+        calculateOffer(res.data.offer);
       } catch (error) {
         alert("Date Should not be lesserthan today");
         console.log(error);
@@ -145,8 +163,14 @@ function Dashboard() {
                     name="date"
                     onChange={formik.handleChange}
                     value={formik.values.date}
-                    
                   />
+                  <button
+                    type="button"
+                    onClick={() => showDate()}
+                    className={`btn btn-warning ${display}`}
+                  >
+                    Change Date
+                  </button>
                 </div>
                 {formik.errors.checkDate ? (
                   <span className="text-danger">{formik.errors.checkDate}</span>
@@ -173,21 +197,29 @@ function Dashboard() {
             <div className="container">
               {airline.map((item) => {
                 return (
-                  <div className="row mt-5">
-                    <div class="card text-center">
-                      <div class="card-header airlines">{item}</div>
-                      <div class="card-body">
-                        <h5 class="card-title">{`${formik.values.from} --✈-> ${formik.values.to}`}</h5>
-                        <p class="card-text">
-                          Price: $
-                        </p>
-                        <a href="#" class="btn btn-primary">
-                          Book Ticket
-                        </a>
-                      </div>
-                      <div class="card-footer text-muted">{`${formik.values.date}`}</div>
-                    </div>
-                  </div>
+                  // <div className="row mt-5">
+                  //   <div class="card text-center">
+                  //     <div class="card-header airlines">{item}</div>
+                  //     <div class="card-body">
+                  //       <h5 class="card-title">{`${formik.values.from} --✈-> ${formik.values.to}`}</h5>
+                  //       <p class="card-text">
+                  //         By applying {offer}% offer Price: ${price}
+                  //       </p>
+                  //       <a href="#" class="btn btn-primary">
+                  //         Book Ticket
+                  //       </a>
+                  //     </div>
+                  //     <div class="card-footer text-muted">{`${formik.values.date}`}</div>
+                  //   </div>
+                  // </div>
+                  <Card
+                    item={item}
+                    from={formik.values.from}
+                    to={formik.values.to}
+                    offer={offer}
+                    price={price}
+                    date={formik.values.date}
+                  />
                 );
               })}
             </div>

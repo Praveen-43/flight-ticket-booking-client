@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { CgProfile } from "react-icons/cg";
 
 function Navbar() {
@@ -14,17 +14,39 @@ function Navbar() {
     <>
       <div className="container-fluid bg-dark">
         <div className="row ">
-          <div className="col  m-3 text-white fs-5 ">Flight Booking</div>
+          <Link
+            className="col  m-3 text-white fs-5 pointer"
+            to={`/dashboard/${localStorage.getItem("userid")}`}
+          >
+            Flight Booking
+          </Link>
           <div className="col d-flex justify-content-end align-items-center">
             <div className="text-white me-2">{navUser}</div>
-            <CgProfile
-              className="text-white fs-2 me-3 pointer "
-              data-bs-toggle="tooltip"
-              data-bs-placement="top"
-              data-bs-custom-class="custom-tooltip"
-              data-bs-title="This top tooltip is themed via CSS variables."
-            />
 
+            <div class="dropdown">
+              <CgProfile
+                className="text-white fs-2 me-3 pointer dropdown-toggle"
+                type="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              />
+
+              <ul className="dropdown-menu">
+                <li>
+                  <Link
+                    to={`/allticket/${localStorage.getItem("userid")}`}
+                    className="dropdown-item"
+                  >
+                    View Your Bookings
+                  </Link>
+                </li>
+                <li>
+                  <a className="dropdown-item" onClick={() => handleLogout()}>
+                    Logout
+                  </a>
+                </li>
+              </ul>
+            </div>
             <button
               onClick={() => handleLogout()}
               className="btn btn-light text-dark"
